@@ -1386,15 +1386,31 @@ var venn = venn || {'version' : '0.2'};
     /** Returns the intersection area of a bunch of circles (where each circle
      is an object having an x,y and radius property) */
     venn.intersectionArea = function(circles, stats) {
-        // get all the intersection points of the circles
+        
+		console.log("IntersectionArea, number of circles: " + circles.length);
+		
+		// get all the intersection points of the circles
         var intersectionPoints = getIntersectionPoints(circles);
+		//console.log("intersectionPoints: " + intersectionPoints.length);
 
         // filter out points that aren't included in all the circles
         var innerPoints = intersectionPoints.filter(function (p) {
             return venn.containedInCircles(p, circles);
         });
+		
+		//console.log("innerPoints: " + innerPoints.length);
 
         var arcArea = 0, polygonArea = 0, arcs = [], i;
+		
+		// **For 3 circle diagrams only**
+		// find all areas with only where that is (AB)(!C) where A,B,C are circles
+		var outsidePoints = intersectionPoints.filter(function(p) {
+			return !venn.containedInCircles(p, circles);
+		});
+				
+		//if (circles.length ==3 && innerPoints.length > 1){
+			// begin with points that are intersection of only 2 circles
+		//}
 
         // if we have intersection points that are within all the circles,
         // then figure out the area contained by them
@@ -1497,11 +1513,17 @@ var venn = venn || {'version' : '0.2'};
             stats.innerPoints = innerPoints;
             stats.intersectionPoints = intersectionPoints;
         }
+		
+		for (i = 0; i < arcs.length; ++i){
+			console.log(arcs[i].p1.x +','+ arcs[i].p1.y +','+ arcs[i].p2.x +','+ arcs[i].p2.y);
+		}
 
         return arcArea + polygonArea;
     };
 
-    /** returns whether a point is contained by all of a list of circles */
+    
+	
+	/** returns whether a point is contained by all of a list of circles */
     venn.containedInCircles = function(point, circles) {
         for (var i = 0; i < circles.length; ++i) {
             if (venn.distance(point, circles[i]) > circles[i].radius + SMALL) {

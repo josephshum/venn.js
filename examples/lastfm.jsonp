@@ -3,8 +3,10 @@ var sets = [
          {"sets": [1], "label": "010 (2)", "size": 100},
          {"sets": [2], "label": "100 (4)", "size": 100},
          
-         {"sets": [0, 1], "label": "011 (3)", "size": 20},
+         {"sets": [0, 1], "not":[2], "label": "011 (3)", "size": 20},
          {"sets": [0, 2], "label": "101 (5)", "size": 20},
          {"sets": [1, 2], "label": "110 (6)", "size": 20},
-         {"sets": [0, 1, 2], "label": "111 (7)", "size":10}
+		 
+		 {"sets": [0, 1, 2], "label": "111 (7)", "size":10},
+         
          ];
