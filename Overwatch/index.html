@@ -15,15 +15,15 @@
 <div style="float:left;padding:20px">
     <table>
     <tr>
-      <td>|A|</td>
+      <td>|E|</td>
       <td>
-        <input class="input-mini venn_area" id="A" type="number" value="16">
+        <input class="input-mini venn_area" id="E" type="number" value="16">
       </td>
     </tr>
     <tr>
-      <td>|B|</td>
+      <td>|S|</td>
       <td>
-        <input class="input-mini venn_area" id="B" type="number" value="16">
+        <input class="input-mini venn_area" id="S" type="number" value="16">
       </td>
     </tr>
     <tr>
@@ -35,25 +35,25 @@
     <tr>
       <td>|A&#8745B|</td>
       <td>
-        <input class="input-mini venn_area" id="A,B" type="number" value="4">
+        <input class="input-mini venn_area" id="E,S" type="number" value="4">
       </td>
     </tr>
     <tr>
       <td>|A&#8745C|</td>
       <td>
-        <input class="input-mini venn_area" id="A,C" type="number" value="4">
+        <input class="input-mini venn_area" id="E,C" type="number" value="4">
       </td>
     </tr>
     <tr>
       <td>|B&#8745C|</td>
       <td>
-        <input class="input-mini venn_area" id="B,C" type="number" value="3">
+        <input class="input-mini venn_area" id="S,C" type="number" value="3">
       </td>
     </tr>
     <tr>
       <td>|A&#8745B&#8745C|&nbsp</td>
       <td>
-        <input class="input-mini venn_area" id="A,B,C" type="number" value="2">
+        <input class="input-mini venn_area" id="E,S,C" type="number" value="2">
       </td>
     </tr>
     </table>
@@ -63,7 +63,7 @@
 
 </body>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
-<script src="venn.js"></script>
+<script src="../venn.js"></script>
 <script>
 function getSetIntersections() {
     areas = d3.selectAll(".venn_area")[0].map(
@@ -87,17 +87,12 @@ d3.selectAll("input").on("change", function() {
 });
 
 // tweak style
-var colours = ['black', 'red', 'blue'];
+var colours = ['red', 'green', 'blue'];
 d3.selectAll("#venn .venn-circle path")
-    .style("fill-opacity", 0)
-    .style("stroke-width", 10)
+    .style("fill-opacity", 0.5)
+    .style("stroke-width", 0)
     .style("stroke-opacity", .5)
     .style("stroke", function(d,i) { return colours[i]; });
-
-d3.selectAll("#venn .venn-circle text")
-    .style("fill", function(d,i) { return colours[i]})
-    .style("font-size", "32px")
-    .style("font-weight", "100");
 
 </script>
 </html>

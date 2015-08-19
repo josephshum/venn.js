@@ -406,8 +406,7 @@ var venn = venn || {'version' : '0.2'};
 
         } else {
             // draw path around arcs
-            console.log(arcs.length);
-			var ret = ["\nM", arcs[0].p2.x, arcs[0].p2.y];
+            var ret = ["\nM", arcs[0].p2.x, arcs[0].p2.y];
             for (var i = 0; i < arcs.length; ++i) {
                 var arc = arcs[i], r = arc.circle.radius, wide = arc.width > r;
                 ret.push("\nA", r, r, 0, wide ? 1 : 0, 1,
