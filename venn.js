@@ -44,20 +44,46 @@ var venn = venn || {'version' : '0.2'};
                 // current paths
                 var pathTween = function(d) {
                     return function(t) {
-                        var c = d.sets.map(function (set) {
-                            var start = previous[set], end = circles[set];
-                            if (!start) {
-                                start = {x : width/2, y : height/2, radius : 1};
-                            }
-                            if (!end) {
-                                end = {x : width/2, y : height/2, radius : 1};
-                            }
-                            return {'x' : start.x * (1 - t) + end.x * t,
-                                    'y' : start.y * (1 - t) + end.y * t,
-                                    'radius' : start.radius * (1 - t) + end.radius * t};
+                        var c;
 
-                        });
-                        return venn.intersectionAreaPath(c);
+                        if (d.hasOwnProperty('sets')){
+                            c = d.sets.map(function (set) {
+                                var start = previous[set], end = circles[set];
+                                if (!start) {
+                                    start = {x: width / 2, y: height / 2, radius: 1};
+                                }
+                                if (!end) {
+                                    end = {x: width / 2, y: height / 2, radius: 1};
+                                }
+                                return {
+                                    'x': start.x * (1 - t) + end.x * t,
+                                    'y': start.y * (1 - t) + end.y * t,
+                                    'radius': start.radius * (1 - t) + end.radius * t
+                                };
+
+                            });
+                            return venn.intersectionAreaPath(c);
+                        }
+                        else {
+                            c = d.pSets.map(function (set) {
+                                var start = previous[set], end = circles[set];
+                                if (!start) {
+                                    start = {x: width / 2, y: height / 2, radius: 1};
+                                }
+                                if (!end) {
+                                    end = {x: width / 2, y: height / 2, radius: 1};
+                                }
+                                return {
+                                    'x': start.x * (1 - t) + end.x * t,
+                                    'y': start.y * (1 - t) + end.y * t,
+                                    'radius': start.radius * (1 - t) + end.radius * t
+                                };
+
+                            });
+                            // JS: it's pretty close, should be able to add points here to change the path.
+                            return venn.intersectionAreaPath(c);
+                        }
+
                     };
                 };
 
@@ -69,19 +95,38 @@ var venn = venn || {'version' : '0.2'};
                 var enter = nodes.enter()
                     .append('g')
                     .attr("class", function(d) {
+                        if (d.hasOwnProperty('sets')){
+                            console.log("sets Found!");
+                        }
+
+                        if (d.hasOwnProperty('pSets') && d.hasOwnProperty('nSets')){
+                            return "venn-area venn-" +
+                                "intersection" +
+                                (" venn-sets-" + d.pSets.join("_") + "_n" + d.nSets[0]);
+                        }
+
                         return "venn-area venn-" +
                             (d.sets.length == 1 ? "circle" : "intersection") +
                             (" venn-sets-" + d.sets.join("_"));
                     });
 
                 enter.append("path")
-                    .style("fill-opacity", "0")
-                    .filter(function (d) { return d.sets.length == 1; } )
+                    .style("fill-opacity", "0.5")
+                    .filter(function (d) {
+                        if (d.hasOwnProperty('sets') && d.sets.length == 1) return true;
+                        return false;
+                    } )
                     .style("fill", function(d) { return colours(label(d)); })
                     .style("fill-opacity", ".25");
 
                 var enterText = enter.append("text")
-                    .style("fill", function(d) { return d.sets.length == 1 ? colours(label(d)) : "#444"; })
+                    .style("fill", function(d) {
+                        if (d.hasOwnProperty('sets') && d.sets.length == 1){
+                            return colours(label(d));
+                        }else {
+                            return "#444";
+                        }
+                    })
                     .text(function (d) { return label(d); } )
                     .attr("text-anchor", "middle")
                     .attr("dy", ".35em")
@@ -97,10 +142,15 @@ var venn = venn || {'version' : '0.2'};
                     .text(function (d) { return label(d); } )
                     .each("end", venn.wrapText(circles, label))
                     .attr("x", function(d) {
-                        return Math.floor(textCentres[d.sets].x);
+                        if (d.hasOwnProperty('sets')){
+                            return Math.floor(textCentres[d.sets].x);
+                        }else return 20;
+
                     })
                     .attr("y", function(d) {
-                        return Math.floor(textCentres[d.sets].y);
+                        if (d.hasOwnProperty('sets')) {
+                            return Math.floor(textCentres[d.sets].y);
+                        }else return 20;
                     });
 
                 // if we've been passed a fontSize explicitly, use it to
@@ -127,7 +177,7 @@ var venn = venn || {'version' : '0.2'};
             if (d.label) {
                 return d.label;
             }
-            if (d.sets.length == 1) {
+            if (d.hasOwnProperty('sets') && d.sets.length == 1) {
                 return '' + d.sets[0];
             }
         }
@@ -326,8 +376,11 @@ var venn = venn || {'version' : '0.2'};
     }
     venn.computeTextCentre = computeTextCentre;
 
-    function computeTextCentres(circles, areas) {
+    function computeTextCentres(circles, areas_all) {
         var ret = {};
+        var areas = areas_all.filter(function(area){
+            return area.hasOwnProperty('sets');
+        });
         for (var i = 0; i < areas.length; ++i) {
             var area = areas[i].sets, areaids = {};
             for (var j = 0; j < area.length; ++j) {
@@ -395,6 +448,8 @@ var venn = venn || {'version' : '0.2'};
     venn.intersectionAreaPath = function(circles) {
         var stats = {};
         venn.intersectionArea(circles, stats);
+        console.log("intersectionAreaPath ran!!!!!!!!!!!!!!!");
+        //venn.intersectionArea_negativeRegions(circles,stats);
         var arcs = stats.arcs;
 
         if (arcs.length === 0) {
@@ -406,7 +461,7 @@ var venn = venn || {'version' : '0.2'};
 
         } else {
             // draw path around arcs
-            console.log(arcs.length);
+            //console.log(arcs.length);
 			var ret = ["\nM", arcs[0].p2.x, arcs[0].p2.y];
             for (var i = 0; i < arcs.length; ++i) {
                 var arc = arcs[i], r = arc.circle.radius, wide = arc.width > r;
@@ -423,7 +478,13 @@ var venn = venn || {'version' : '0.2'};
     /** given a list of set objects, and their corresponding overlaps.
     updates the (x, y, radius) attribute on each set such that their positions
     roughly correspond to the desired overlaps */
-    venn.venn = function(areas, parameters) {
+    venn.venn = function(areas_all, parameters) {
+
+        // skipping over all negative regions for purpose of layout
+        var areas = areas_all.filter(function(area){
+            return area.hasOwnProperty('sets');
+        });
+
         parameters = parameters || {};
         parameters.maxIterations = parameters.maxIterations || 500;
         var lossFunction = parameters.lossFunction || venn.lossFunction;
@@ -491,6 +552,12 @@ var venn = venn || {'version' : '0.2'};
     /// Returns two matrices, one of the euclidean distances between the sets
     /// and the other indicating if there are subset or disjoint set relationships
     venn.getDistanceMatrices = function(areas, sets, setids) {
+
+        // skip over all "negative regions"
+        areas = areas.filter(function(area){
+            return area.hasOwnProperty('sets');
+        });
+
         // initialize an empty distance matrix between all the points
         var distances = venn.zerosM(sets.length, sets.length),
             constraints = venn.zerosM(sets.length, sets.length);
@@ -586,7 +653,7 @@ var venn = venn || {'version' : '0.2'};
         var sets = [], setids = {}, i;
         for (i = 0; i < areas.length; ++i ) {
             var area = areas[i];
-            if (area.sets.length == 1) {
+            if (area.hasOwnProperty('sets') && area.sets.length == 1) {
                 setids[area.sets[0]] = sets.length;
                 sets.push(area);
             }
@@ -644,7 +711,7 @@ var venn = venn || {'version' : '0.2'};
         var circles = {}, setOverlaps = {}, set;
         for (var i = 0; i < areas.length; ++i) {
             var area = areas[i];
-            if (area.sets.length == 1) {
+            if (area.hasOwnProperty('sets') && area.sets.length == 1) {
                 set = area.sets[0];
                 circles[set] = {x: 1e10, y: 1e10,
                                 rowid: circles.length,
@@ -653,7 +720,12 @@ var venn = venn || {'version' : '0.2'};
                 setOverlaps[set] = [];
             }
         }
-        areas = areas.filter(function(a) { return a.sets.length == 2; });
+        areas = areas.filter(function(a) {
+            if (a.hasOwnProperty('sets')){
+                return a.sets.length == 2;
+            }
+            return false;
+        });
 
         // map each set to a list of all the other sets that overlap it
         for (i = 0; i < areas.length; ++i) {
@@ -1385,6 +1457,135 @@ var venn = venn || {'version' : '0.2'};
 
     /** Returns the intersection area of a bunch of circles (where each circle
      is an object having an x,y and radius property) */
+
+    ////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////
+    venn.intersectionArea_negativeRegions = function(circles, stats) {
+
+        console.log("IntersectionArea, number of circles: " + circles.length);
+
+        // get all the intersection points of the circles
+        var intersectionPoints = getIntersectionPoints(circles);
+        //console.log("intersectionPoints: " + intersectionPoints.length);
+
+        // filter out points that aren't included in all the circles
+        var innerPoints = intersectionPoints.filter(function (p) {
+            return venn.containedInCircles(p, circles);
+        });
+
+        //console.log("innerPoints: " + innerPoints.length);
+
+        var arcArea = 0, polygonArea = 0, arcs = [], i;
+
+        //////////////////////////////////////////////////////////////////////////////////
+        // **For 3 circle diagrams only**
+        // find all areas with only where that is (AB)(!C) where A,B,C are circles
+        var outsidePoints = intersectionPoints.filter(function(p) {
+            return !venn.containedInCircles(p, circles);
+        });
+
+        if (circles.length ==3 && innerPoints.length ==3){
+            // get the right points, for testing, only get circle 0 and 1
+            var abNotCPoints = intersectionPoints.filter(function(p){
+                var twoCircles = [], circleToExclude = [];
+
+                circleToExclude.push(circles[2]);
+
+                // filter out all points that is completely contained within C (keeping points on the diameter)
+                if (venn.distance(p, circles[2]) < circles[2].radius - SMALL) {
+                    return false;
+                }
+
+                twoCircles.push(circles[0]);
+                twoCircles.push(circles[1]);
+                return venn.containedInCircles(p, twoCircles);
+
+            });
+            console.log(abNotCPoints);
+            // begin with points that are intersection of only 2 circles
+
+            var abnc_center = venn.getCenter(abNotCPoints);
+            for (i = 0; i < abNotCPoints.length; ++i ) {
+                var abnc_p = abNotCPoints[i];
+                abnc_p.angle = Math.atan2(abnc_p.x - abnc_center.x, abnc_p.y - abnc_center.y);
+            }
+            abNotCPoints.sort(function(a,b) { return b.angle - a.angle;});
+
+            // iterate over all points, get arc between the points
+            // and update the areas
+            var abnc_p2 = abNotCPoints[abNotCPoints.length - 1];
+            for (i = 0; i < abNotCPoints.length; ++i) {
+                var abnc_p1 = abNotCPoints[i];
+
+                // polygon area updates easily ...
+                polygonArea += (abnc_p2.x + abnc_p1.x) * (abnc_p1.y - abnc_p2.y);
+
+                // updating the arc area is a little more involved
+                var abnc_midPoint = {x : (abnc_p1.x + abnc_p2.x) / 2,
+                        y : (abnc_p1.y + abnc_p2.y) / 2},
+                    abnc_arc = null;
+
+                for (var k = 0; k < abnc_p1.parentIndex.length; ++k) {
+                    if (abnc_p2.parentIndex.indexOf(abnc_p1.parentIndex[k]) > -1) {
+                        // figure out the angle halfway between the two points
+                        // on the current circle
+                        var abnc_circle = circles[abnc_p1.parentIndex[k]],
+                            abnc_a1 = Math.atan2(abnc_p1.x - abnc_circle.x, abnc_p1.y - abnc_circle.y),
+                            abnc_a2 = Math.atan2(abnc_p2.x - abnc_circle.x, abnc_p2.y - abnc_circle.y);
+
+                        var abnc_angleDiff = (abnc_a2 - abnc_a1);
+                        if (abnc_angleDiff < 0) {
+                            abnc_angleDiff += 2*Math.PI;
+                        }
+
+                        // and use that angle to figure out the width of the
+                        // arc
+                        var abnc_a = abnc_a2 - abnc_angleDiff/2,
+                            abnc_width = venn.distance(abnc_midPoint, {
+                                x : abnc_circle.x + abnc_circle.radius * Math.sin(abnc_a),
+                                y : abnc_circle.y + abnc_circle.radius * Math.cos(abnc_a)
+                            });
+
+                        // pick the circle whose arc has the smallest width
+                        if ((abnc_arc === null) || (abnc_arc.width > abnc_width)) {
+                            abnc_arc = { circle : abnc_circle,
+                                width : abnc_width,
+                                p1 : abnc_p1,
+                                p2 : abnc_p2};
+                        }
+                    }
+                }
+                arcs.push(abnc_arc);
+                arcArea += venn.circleArea(abnc_arc.circle.radius, abnc_arc.width);
+                abnc_p2 = abnc_p1;
+            }
+
+
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////
+
+        polygonArea /= 2;
+        if (stats) {
+            stats.area = arcArea + polygonArea;
+            stats.arcArea = arcArea;
+            stats.polygonArea = polygonArea;
+            stats.arcs.push(arcs);
+            stats.innerPoints = innerPoints;
+            stats.intersectionPoints = intersectionPoints;
+        }
+
+        //for (i = 0; i < arcs.length; ++i){
+        //	console.log(arcs[i].p1.x +','+ arcs[i].p1.y +','+ arcs[i].p2.x +','+ arcs[i].p2.y);
+        //}
+
+        return arcArea + polygonArea;
+    };
+    ///////////////////////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////////////////////
+
+
+
     venn.intersectionArea = function(circles, stats) {
         
 		console.log("IntersectionArea, number of circles: " + circles.length);
@@ -1401,16 +1602,7 @@ var venn = venn || {'version' : '0.2'};
 		//console.log("innerPoints: " + innerPoints.length);
 
         var arcArea = 0, polygonArea = 0, arcs = [], i;
-		
-		// **For 3 circle diagrams only**
-		// find all areas with only where that is (AB)(!C) where A,B,C are circles
-		var outsidePoints = intersectionPoints.filter(function(p) {
-			return !venn.containedInCircles(p, circles);
-		});
-				
-		//if (circles.length ==3 && innerPoints.length > 1){
-			// begin with points that are intersection of only 2 circles
-		//}
+
 
         // if we have intersection points that are within all the circles,
         // then figure out the area contained by them
@@ -1514,9 +1706,9 @@ var venn = venn || {'version' : '0.2'};
             stats.intersectionPoints = intersectionPoints;
         }
 		
-		for (i = 0; i < arcs.length; ++i){
-			console.log(arcs[i].p1.x +','+ arcs[i].p1.y +','+ arcs[i].p2.x +','+ arcs[i].p2.y);
-		}
+		//for (i = 0; i < arcs.length; ++i){
+		//	console.log(arcs[i].p1.x +','+ arcs[i].p1.y +','+ arcs[i].p2.x +','+ arcs[i].p2.y);
+		//}
 
         return arcArea + polygonArea;
     };
