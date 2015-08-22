@@ -62,10 +62,27 @@ var venn = venn || {'version' : '0.2'};
                                 };
 
                             });
+
                             return venn.intersectionAreaPath(c);
                         }
                         else {
-                            c = d.pSets.map(function (set) {
+                            var positiveCircles = d.pSets.map(function (set) {
+                                var start = previous[set], end = circles[set];
+                                if (!start) {
+                                    start = {x: width / 2, y: height / 2, radius: 1};
+                                }
+                                if (!end) {
+                                    end = {x: width / 2, y: height / 2, radius: 1};
+                                }
+                                return {
+                                    'x': start.x * (1 - t) + end.x * t,
+                                    'y': start.y * (1 - t) + end.y * t,
+                                    'radius': start.radius * (1 - t) + end.radius * t
+                                };
+
+                            });
+
+                            var negativeCircles = d.nSets.map(function (set) {
                                 var start = previous[set], end = circles[set];
                                 if (!start) {
                                     start = {x: width / 2, y: height / 2, radius: 1};
@@ -81,7 +98,8 @@ var venn = venn || {'version' : '0.2'};
 
                             });
                             // JS: it's pretty close, should be able to add points here to change the path.
-                            return venn.intersectionAreaPath(c);
+                            // the follow returns the actual svg arc strings
+                            return venn.intersectionAreaPath_negativeRegions(positiveCircles, negativeCircles);
                         }
 
                     };
@@ -471,6 +489,33 @@ var venn = venn || {'version' : '0.2'};
             return ret.join(" ");
         }
     };
+
+    /** dup of the above except it takes into account for negative regions. */
+    venn.intersectionAreaPath_negativeRegions = function (pCircles, nCircles){
+        var stats = {};
+        venn.intersectionArea_negativeRegions(pCircles, nCircles, stats);
+        var arcs = stats.arcs;
+
+        if (arcs.length === 0) {
+            return "M 0 0";
+
+        } else if (arcs.length == 1) {
+            var circle = arcs[0].circle;
+            return venn.circlePath(circle.x, circle.y, circle.radius);
+
+        } else {
+            // draw path around arcs
+            //console.log(arcs.length);
+            var ret = ["\nM", arcs[0].p2.x, arcs[0].p2.y];
+            for (var i = 0; i < arcs.length; ++i) {
+                var arc = arcs[i], r = arc.circle.radius, wide = arc.width > r;
+                ret.push("\nA", r, r, 0, wide ? 1 : 0, 1,
+                    arc.p1.x, arc.p1.y);
+            }
+            return ret.join(" ");
+        }
+    };
+
 })(venn);
 
 (function(venn) {
@@ -1460,17 +1505,19 @@ var venn = venn || {'version' : '0.2'};
 
     ////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////
-    venn.intersectionArea_negativeRegions = function(circles, stats) {
+    venn.intersectionArea_negativeRegions = function(pCircles, nCircles, stats) {
 
-        console.log("IntersectionArea, number of circles: " + circles.length);
+        // JS: Start here again. this needs to return stats to arcs
+
+        console.log("IntersectionArea, number of circles: " + pCircles.length);
 
         // get all the intersection points of the circles
-        var intersectionPoints = getIntersectionPoints(circles);
+        var intersectionPoints = getIntersectionPoints(pCircles);
         //console.log("intersectionPoints: " + intersectionPoints.length);
 
         // filter out points that aren't included in all the circles
         var innerPoints = intersectionPoints.filter(function (p) {
-            return venn.containedInCircles(p, circles);
+            return venn.containedInCircles(p, pCircles);
         });
 
         //console.log("innerPoints: " + innerPoints.length);
@@ -1481,15 +1528,15 @@ var venn = venn || {'version' : '0.2'};
         // **For 3 circle diagrams only**
         // find all areas with only where that is (AB)(!C) where A,B,C are circles
         var outsidePoints = intersectionPoints.filter(function(p) {
-            return !venn.containedInCircles(p, circles);
+            return !venn.containedInCircles(p, pCircles);
         });
 
-        if (circles.length ==3 && innerPoints.length ==3){
+        if (pCircles.length ==3 && innerPoints.length ==3){
             // get the right points, for testing, only get circle 0 and 1
             var abNotCPoints = intersectionPoints.filter(function(p){
                 var twoCircles = [], circleToExclude = [];
 
-                circleToExclude.push(circles[2]);
+                circleToExclude.push(pCircles[2]);
 
                 // filter out all points that is completely contained within C (keeping points on the diameter)
                 if (venn.distance(p, circles[2]) < circles[2].radius - SMALL) {
