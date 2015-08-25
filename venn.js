@@ -1511,13 +1511,15 @@ var venn = venn || {'version' : '0.2'};
 
         console.log("IntersectionArea, number of circles: " + pCircles.length);
 
+        var allCircles = pCircles.concat(nCircles);
+
         // get all the intersection points of the circles
-        var intersectionPoints = getIntersectionPoints(pCircles);
+        var intersectionPoints = getIntersectionPoints(allCircles);
         //console.log("intersectionPoints: " + intersectionPoints.length);
 
-        // filter out points that aren't included in all the circles
+        // get points that are inside every circle
         var innerPoints = intersectionPoints.filter(function (p) {
-            return venn.containedInCircles(p, pCircles);
+            return venn.containedInCircles(p, allCircles);
         });
 
         //console.log("innerPoints: " + innerPoints.length);
@@ -1527,27 +1529,27 @@ var venn = venn || {'version' : '0.2'};
         //////////////////////////////////////////////////////////////////////////////////
         // **For 3 circle diagrams only**
         // find all areas with only where that is (AB)(!C) where A,B,C are circles
-        var outsidePoints = intersectionPoints.filter(function(p) {
-            return !venn.containedInCircles(p, pCircles);
-        });
 
-        if (pCircles.length ==3 && innerPoints.length ==3){
-            // get the right points, for testing, only get circle 0 and 1
-            var abNotCPoints = intersectionPoints.filter(function(p){
-                var twoCircles = [], circleToExclude = [];
+        if (allCircles.length ==3 && innerPoints.length ==3){
 
-                circleToExclude.push(pCircles[2]);
+            //using notation circles AB!C
+            // get points that are only in AB intersection
+            var abPoints = intersectionPoints.filter(function(p){
+                return venn.containedInCircles(p, pCircles);
+            });
 
-                // filter out all points that is completely contained within C (keeping points on the diameter)
-                if (venn.distance(p, circles[2]) < circles[2].radius - SMALL) {
+            var abNotCPoints = abPoints.filter(function(p){
+                //return venn.containedInCircles(p, nCircles);
+
+                    for (var i = 0; i < nCircles.length; ++i) {
+                        if (venn.distance(p, nCircles[i]) > nCircles[i].radius - SMALL) {
+                            return true;
+                        }
+                    }
                     return false;
-                }
-
-                twoCircles.push(circles[0]);
-                twoCircles.push(circles[1]);
-                return venn.containedInCircles(p, twoCircles);
 
             });
+
             console.log(abNotCPoints);
             // begin with points that are intersection of only 2 circles
 
@@ -1557,6 +1559,8 @@ var venn = venn || {'version' : '0.2'};
                 abnc_p.angle = Math.atan2(abnc_p.x - abnc_center.x, abnc_p.y - abnc_center.y);
             }
             abNotCPoints.sort(function(a,b) { return b.angle - a.angle;});
+
+            // [JS 8/24]: stop here. Has the 3 points. now draw curves below
 
             // iterate over all points, get arc between the points
             // and update the areas
