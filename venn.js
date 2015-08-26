@@ -509,7 +509,9 @@ var venn = venn || {'version' : '0.2'};
             var ret = ["\nM", arcs[0].p2.x, arcs[0].p2.y];
             for (var i = 0; i < arcs.length; ++i) {
                 var arc = arcs[i], r = arc.circle.radius, wide = arc.width > r;
-                ret.push("\nA", r, r, 0, wide ? 1 : 0, 1,
+                ret.push("\nA", r, r, 0,
+                    wide ? 1 : 0,
+                    arc.nArc ? 0 : 1,
                     arc.p1.x, arc.p1.y);
             }
             return ret.join(" ");
@@ -1580,7 +1582,7 @@ var venn = venn || {'version' : '0.2'};
                     if (abnc_p2.parentIndex.indexOf(abnc_p1.parentIndex[k]) > -1) {
                         // figure out the angle halfway between the two points
                         // on the current circle
-                        var abnc_circle = circles[abnc_p1.parentIndex[k]],
+                        var abnc_circle = allCircles[abnc_p1.parentIndex[k]],
                             abnc_a1 = Math.atan2(abnc_p1.x - abnc_circle.x, abnc_p1.y - abnc_circle.y),
                             abnc_a2 = Math.atan2(abnc_p2.x - abnc_circle.x, abnc_p2.y - abnc_circle.y);
 
@@ -1589,12 +1591,23 @@ var venn = venn || {'version' : '0.2'};
                             abnc_angleDiff += 2*Math.PI;
                         }
 
+
+                        // dirty hack begins here. Manually change the direction of the curve only
+                        // when the 2 points lie on the C's diameter
+                        var dir = 1;
+                        var nArc = false;
+                        if ((venn.distance(abnc_p1, nCircles[0]) < nCircles[0].radius + SMALL) &&
+                            (venn.distance(abnc_p2, nCircles[0]) < nCircles[0].radius + SMALL)) {
+                            dir = -1 ;
+                            nArc = true;
+                        }
+
                         // and use that angle to figure out the width of the
                         // arc
                         var abnc_a = abnc_a2 - abnc_angleDiff/2,
                             abnc_width = venn.distance(abnc_midPoint, {
-                                x : abnc_circle.x + abnc_circle.radius * Math.sin(abnc_a),
-                                y : abnc_circle.y + abnc_circle.radius * Math.cos(abnc_a)
+                                x : abnc_circle.x + dir * abnc_circle.radius * Math.sin(abnc_a),
+                                y : abnc_circle.y + dir * abnc_circle.radius * Math.cos(abnc_a)
                             });
 
                         // pick the circle whose arc has the smallest width
@@ -1602,7 +1615,9 @@ var venn = venn || {'version' : '0.2'};
                             abnc_arc = { circle : abnc_circle,
                                 width : abnc_width,
                                 p1 : abnc_p1,
-                                p2 : abnc_p2};
+                                p2 : abnc_p2,
+                                nArc : nArc
+                            };
                         }
                     }
                 }
@@ -1621,7 +1636,8 @@ var venn = venn || {'version' : '0.2'};
             stats.area = arcArea + polygonArea;
             stats.arcArea = arcArea;
             stats.polygonArea = polygonArea;
-            stats.arcs.push(arcs);
+            stats.arcs = arcs;
+            stats.arcs = arcs;
             stats.innerPoints = innerPoints;
             stats.intersectionPoints = intersectionPoints;
         }
