@@ -97,8 +97,7 @@ var venn = venn || {'version' : '0.2'};
                                 };
 
                             });
-                            // JS: it's pretty close, should be able to add points here to change the path.
-                            // the follow returns the actual svg arc strings
+
                             return venn.intersectionAreaPath_negativeRegions(positiveCircles, negativeCircles);
                         }
 
@@ -107,25 +106,32 @@ var venn = venn || {'version' : '0.2'};
 
                 // update data, joining on the set ids
                 var nodes = svg.selectAll("g")
-                    .data(data, function(d) { return d.sets; });
+                    .data(data, function(d) {
+                        if (d.hasOwnProperty('pSets')){
+                            //return d.sets;
+                            // THis is really messed up. It will work if I return an undefined d.sets.
+                            return d.sets;
+                            // But only for the first negative region.
+                        }
+                        else{
+                            return d.sets;
+                        }
+                    });
 
                 // create new nodes
                 var enter = nodes.enter()
                     .append('g')
                     .attr("class", function(d) {
-                        if (d.hasOwnProperty('sets')){
-                            console.log("sets Found!");
-                        }
-
                         if (d.hasOwnProperty('pSets') && d.hasOwnProperty('nSets')){
                             return "venn-area venn-" +
                                 "intersection" +
                                 (" venn-sets-" + d.pSets.join("_") + "_n" + d.nSets[0]);
                         }
-
-                        return "venn-area venn-" +
-                            (d.sets.length == 1 ? "circle" : "intersection") +
-                            (" venn-sets-" + d.sets.join("_"));
+                        else {
+                            return "venn-area venn-" +
+                                (d.sets.length == 1 ? "circle" : "intersection") +
+                                (" venn-sets-" + d.sets.join("_"));
+                        }
                     });
 
                 enter.append("path")
@@ -1511,7 +1517,7 @@ var venn = venn || {'version' : '0.2'};
 
         // JS: Start here again. this needs to return stats to arcs
 
-        console.log("IntersectionArea, number of circles: " + pCircles.length);
+        //console.log("IntersectionArea, number of circles: " + pCircles.length);
 
         var allCircles = pCircles.concat(nCircles);
 
