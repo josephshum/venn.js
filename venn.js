@@ -103,14 +103,14 @@ var venn = venn || {'version' : '0.2'};
 
                     };
                 };
-
+                //var temp = svg.selectAll("g");
                 // update data, joining on the set ids
                 var nodes = svg.selectAll("g")
                     .data(data, function(d) {
                         if (d.hasOwnProperty('pSets')){
                             //return d.sets;
                             // THis is really messed up. It will work if I return an undefined d.sets.
-                            return d.sets;
+                            return d.s;
                             // But only for the first negative region.
                         }
                         else{
