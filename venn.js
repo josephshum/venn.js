@@ -125,7 +125,7 @@ var venn = venn || {'version' : '0.2'};
                         if (d.hasOwnProperty('pSets') && d.hasOwnProperty('nSets')){
                             return "venn-area venn-" +
                                 "intersection" +
-                                (" venn-sets-" + d.pSets.join("_") + "_n" + d.nSets[0]);
+                                (" venn-sets-" + d.pSets.join("_") + "_n" + d.nSets.join("_n"));
                         }
                         else {
                             return "venn-area venn-" +
@@ -1515,10 +1515,6 @@ var venn = venn || {'version' : '0.2'};
     ////////////////////////////////////////////////////////////////////////////////////
     venn.intersectionArea_negativeRegions = function(pCircles, nCircles, stats) {
 
-        // JS: Start here again. this needs to return stats to arcs
-
-        //console.log("IntersectionArea, number of circles: " + pCircles.length);
-
         var allCircles = pCircles.concat(nCircles);
 
         // get all the intersection points of the circles
@@ -1549,12 +1545,14 @@ var venn = venn || {'version' : '0.2'};
             var abNotCPoints = abPoints.filter(function(p){
                 //return venn.containedInCircles(p, nCircles);
 
+                var toInclude = true;
+
                     for (var i = 0; i < nCircles.length; ++i) {
-                        if (venn.distance(p, nCircles[i]) > nCircles[i].radius - SMALL) {
-                            return true;
+                        if (venn.distance(p, nCircles[i]) < nCircles[i].radius - SMALL) {
+                            toInclude = false;
                         }
                     }
-                    return false;
+                    return toInclude;
 
             });
 
@@ -1599,13 +1597,25 @@ var venn = venn || {'version' : '0.2'};
 
 
                         // dirty hack begins here. Manually change the direction of the curve only
-                        // when the 2 points lie on the C's diameter
+                        // when the 2 points lie on the any of nCircle's diameter
                         var dir = 1;
                         var nArc = false;
-                        if ((venn.distance(abnc_p1, nCircles[0]) < nCircles[0].radius + SMALL) &&
-                            (venn.distance(abnc_p2, nCircles[0]) < nCircles[0].radius + SMALL)) {
-                            dir = -1 ;
-                            nArc = true;
+
+                        if (nCircles.length == 1){
+                            if ((venn.distance(abnc_p1, nCircles[0]) < nCircles[0].radius + SMALL) &&
+                                (venn.distance(abnc_p2, nCircles[0]) < nCircles[0].radius + SMALL)) {
+                                dir = -1 ;
+                                nArc = true;
+                            }
+                        } else {
+                            //JS: There is something wrong here, not all curves flipping the right way
+                            for (var l = 0; l < nCircles.length; ++l){
+                                if ((venn.distance(abnc_p1, nCircles[l]) < nCircles[l].radius + SMALL) &&
+                                    (venn.distance(abnc_p2, nCircles[l]) < nCircles[l].radius + SMALL)) {
+                                    dir = -1 ;
+                                    nArc = true;
+                                }
+                            }
                         }
 
                         // and use that angle to figure out the width of the
