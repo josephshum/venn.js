@@ -64,19 +64,19 @@ var sets = [
 { "sets": [1, 2, 3, 4, 5], "size":3330 },
 { "sets": [0, 1, 2, 3, 4, 5], "size":2549 },
 
-
 {"s":[130], "pSets":[1,3], "nSets":[4], "label":"x13n4x", "size":-1},
 {"s":[134], "pSets":[1,4], "nSets":[3], "label":"x14n3x", "size":-1},
 {"s":[173], "pSets":[3,4], "nSets":[1], "label":"x34n1x", "size":-1},
 
+{"s":[1166], "pSets":[3], "nSets":[1, 4], "label":"x3n1n4x", "size":-1},
+{"s":[1130], "pSets":[1], "nSets":[3, 4], "label":"x1n3n4x", "size":-1},
+{"s":[1186], "pSets":[4], "nSets":[1, 3], "label":"x4n1n3x", "size":-1},
 
 ];
 
 var extra =[
 
 
-{"s":[1166], "pSets":[3], "nSets":[1, 4], "label":"x3n1n4x", "size":-1},
-{"s":[1130], "pSets":[1], "nSets":[3, 4], "label":"x1n3n4x", "size":-1},
-{"s":[1186], "pSets":[4], "nSets":[1, 3], "label":"x4n1n3x", "size":-1},
+
 
 ];

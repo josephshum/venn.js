@@ -32,7 +32,8 @@ body {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
 <script src="../venn.js"></script>
-<script src="./lastfm.jsonp"></script>
+<script src="./lastfm_basic.jsonp"></script>
+<!--<script src="./lastfm.jsonp"></script>-->
 
 <script>
 
@@ -82,5 +83,28 @@ div.selectAll("g")
             .style("fill-opacity", d.sets.length == 1 ? .25 : .0)
             .style("stroke-opacity", 0);
     });
+
+//document.getElementsByClassName("venn-area venn-intersection venn-sets-0_n1_n2")[0].querySelector("path").setAttribute("style", "stroke: blue; stroke-width: 4px; fill-opacity: 0.25");
+document.getElementsByClassName("venn-area venn-intersection venn-sets-1_n0_n2")[0].querySelector("path").setAttribute("style", "stroke: red; stroke-width: 4px; fill-opacity: 0.25");
+//document.getElementsByClassName("venn-area venn-intersection venn-sets-2_n0_n1")[0].querySelector("path").setAttribute("style", "stroke: green; stroke-width: 4px; fill-opacity: 0.25");
+
+//document.getElementsByClassName("venn-area venn-intersection venn-sets-0_1_n2")[0].querySelector("path").setAttribute("style", "stroke: orange; stroke-width: 2px; fill-opacity: 0.25");
+//document.getElementsByClassName("venn-area venn-intersection venn-sets-0_2_n1")[0].querySelector("path").setAttribute("style", "stroke: pink; stroke-width: 2px; fill-opacity: 0.25");
+//document.getElementsByClassName("venn-area venn-intersection venn-sets-1_2_n0")[0].querySelector("path").setAttribute("style", "stroke: yellow; stroke-width: 2px; fill-opacity: 0.25");
+
+
+
+//document.getElementsByClassName("venn-area venn-intersection venn-sets-1_3_n4")[0].querySelector("path").setAttribute("style", "stroke: orange; stroke-width: 2px; fill-opacity: 0.25");
+//document.getElementsByClassName("venn-area venn-intersection venn-sets-1_4_n3")[0].querySelector("path").setAttribute("style", "stroke: grey; stroke-width: 2px; fill-opacity: 0.25");
+//document.getElementsByClassName("venn-area venn-intersection venn-sets-3_4_n1")[0].querySelector("path").setAttribute("style", "stroke: yellow; stroke-width: 2px; fill-opacity: 0.25");
+
+//
+//document.getElementsByClassName("venn-area venn-intersection venn-sets-1_n3_n4")[0].querySelector("path").setAttribute("style", "stroke: blue; stroke-width: 4px; fill-opacity: 0.25");
+
+// nArc and dir is flipped
+//document.getElementsByClassName("venn-area venn-intersection venn-sets-3_n1_n4")[0].querySelector("path").setAttribute("style", "stroke: red; stroke-width: 4px; fill-opacity: 0.25");
+//document.getElementsByClassName("venn-area venn-intersection venn-sets-4_n1_n3")[0].querySelector("path").setAttribute("style", "stroke: green; stroke-width: 4px; fill-opacity: 0.25");
+
+
 </script>
 </html>

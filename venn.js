@@ -108,10 +108,7 @@ var venn = venn || {'version' : '0.2'};
                 var nodes = svg.selectAll("g")
                     .data(data, function(d) {
                         if (d.hasOwnProperty('pSets')){
-                            //return d.sets;
-                            // THis is really messed up. It will work if I return an undefined d.sets.
                             return d.s;
-                            // But only for the first negative region.
                         }
                         else{
                             return d.sets;
@@ -472,8 +469,7 @@ var venn = venn || {'version' : '0.2'};
     venn.intersectionAreaPath = function(circles) {
         var stats = {};
         venn.intersectionArea(circles, stats);
-        console.log("intersectionAreaPath ran!!!!!!!!!!!!!!!");
-        //venn.intersectionArea_negativeRegions(circles,stats);
+
         var arcs = stats.arcs;
 
         if (arcs.length === 0) {
@@ -484,8 +480,7 @@ var venn = venn || {'version' : '0.2'};
             return venn.circlePath(circle.x, circle.y, circle.radius);
 
         } else {
-            // draw path around arcs
-            //console.log(arcs.length);
+
 			var ret = ["\nM", arcs[0].p2.x, arcs[0].p2.y];
             for (var i = 0; i < arcs.length; ++i) {
                 var arc = arcs[i], r = arc.circle.radius, wide = arc.width > r;
@@ -510,14 +505,16 @@ var venn = venn || {'version' : '0.2'};
             return venn.circlePath(circle.x, circle.y, circle.radius);
 
         } else {
+            // JS02: Where the arc flags are set
+            //console.log(arcs.length);
             // draw path around arcs
             //console.log(arcs.length);
             var ret = ["\nM", arcs[0].p2.x, arcs[0].p2.y];
             for (var i = 0; i < arcs.length; ++i) {
                 var arc = arcs[i], r = arc.circle.radius, wide = arc.width > r;
                 ret.push("\nA", r, r, 0,
-                    wide ? 1 : 0,
-                    arc.nArc ? 0 : 1,
+                    wide ? 1 : 0, // Large Flag
+                    arc.nArc ? 0 : 1, // Sweet Flag: 0 counter clock wise, 1 clock wise
                     arc.p1.x, arc.p1.y);
             }
             return ret.join(" ");
@@ -1566,8 +1563,6 @@ var venn = venn || {'version' : '0.2'};
             }
             abNotCPoints.sort(function(a,b) { return b.angle - a.angle;});
 
-            // [JS 8/24]: stop here. Has the 3 points. now draw curves below
-
             // iterate over all points, get arc between the points
             // and update the areas
             var abnc_p2 = abNotCPoints[abNotCPoints.length - 1];
@@ -1598,24 +1593,32 @@ var venn = venn || {'version' : '0.2'};
 
                         // dirty hack begins here. Manually change the direction of the curve only
                         // when the 2 points lie on the any of nCircle's diameter
-                        var dir = 1;
-                        var nArc = false;
+                        var dir = 1; // used to calculate width -> big arch small arc
+                        var nArc = false; // used to determine direction -> 1 for clockwise and 0 for counter clockwise
 
+                        // case where there is only 1 negative region
                         if (nCircles.length == 1){
                             if ((venn.distance(abnc_p1, nCircles[0]) < nCircles[0].radius + SMALL) &&
                                 (venn.distance(abnc_p2, nCircles[0]) < nCircles[0].radius + SMALL)) {
                                 dir = -1 ;
                                 nArc = true;
                             }
-                        } else {
-                            //JS: There is something wrong here, not all curves flipping the right way
-                            for (var l = 0; l < nCircles.length; ++l){
-                                if ((venn.distance(abnc_p1, nCircles[l]) < nCircles[l].radius + SMALL) &&
-                                    (venn.distance(abnc_p2, nCircles[l]) < nCircles[l].radius + SMALL)) {
+                        }
+                        // case where there are 2 negative region (this doesn't always work)
+                        else {
+                            //JS01: There is something wrong here, not all curves flipping the right way
+                            //for (var l = 0; l < nCircles.length; ++l){
+
+                            //Outer edge (dir is right for the outer edge)
+                            if ((venn.distance(abnc_p1, pCircles[0]) > nCircles[0].radius - SMALL) &&
+                                    (venn.distance(abnc_p2, pCircles[0]) > nCircles[0].radius - SMALL)) {
                                     dir = -1 ;
                                     nArc = true;
-                                }
                             }
+
+
+
+                            //}
                         }
 
                         // and use that angle to figure out the width of the
@@ -1671,7 +1674,7 @@ var venn = venn || {'version' : '0.2'};
 
     venn.intersectionArea = function(circles, stats) {
         
-		console.log("IntersectionArea, number of circles: " + circles.length);
+		//console.log("IntersectionArea, number of circles: " + circles.length);
 		
 		// get all the intersection points of the circles
         var intersectionPoints = getIntersectionPoints(circles);
