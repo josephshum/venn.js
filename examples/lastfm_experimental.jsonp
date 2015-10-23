@@ -1,0 +1,19 @@
+var sets = [
+  
+{ "sets": [0], "label": "Specifications", "size":100, "lookup": "Specifications" },
+{ "sets": [1], "label": "Edge", "size":200, "lookup": "Edge" },
+{ "sets": [2], "label": "Chrome 47", "size":300, "lookup": "Chrome 47" },
+
+{ "sets": [0, 1], "size":20 },
+{ "sets": [0, 2], "size":40 },
+{ "sets": [1, 2], "size":80 },
+
+{"s":[213], "pSets": [0,1], "nSets": [2], "label": "x01n2x", "size":-1},
+
+{"s":[214], "pSets": [0], "nSets": [1,2], "label": "x0n1n2x", "size":-1},
+{"s":[215], "pSets": [1], "nSets": [0,2], "label": "x1n0n2x", "size":-1},
+{"s":[216], "pSets": [2], "nSets": [0,1], "label": "x2n0n1x", "size":-1},
+
+{ "sets": [0, 1, 2], "size":10 },
+		 		 
+];

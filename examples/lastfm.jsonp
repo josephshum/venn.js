@@ -1,11 +1,12 @@
 var sets = [
   
-{ "sets": [0], "label": "Specifications", "size":0, "lookup": "Specifications" },
+var sets = [
+{ "sets": [0], "label": "Specifications", "size":6066, "lookup": "Specifications" },
 { "sets": [1], "label": "Edge", "size":5720, "lookup": "Edge" },
-{ "sets": [2], "label": "Chrome 47", "size":0, "lookup": "Chrome 47" },
+{ "sets": [2], "label": "Chrome 47", "size":5753, "lookup": "Chrome 47" },
 { "sets": [3], "label": "Firefox 43", "size":7216, "lookup": "Firefox 43" },
 { "sets": [4], "label": "Safari 9", "size":23603, "lookup": "Safari 9" },
-{ "sets": [5], "label": "IE 11", "size":0, "lookup": "IE 11" },
+{ "sets": [5], "label": "IE 11", "size":5456, "lookup": "IE 11" },
 { "sets": [0, 1], "size":3185 },
 { "sets": [0, 2], "size":3539 },
 { "sets": [0, 3], "size":3666 },
@@ -63,6 +64,7 @@ var sets = [
 { "sets": [0, 2, 3, 4, 5], "size":2549 },
 { "sets": [1, 2, 3, 4, 5], "size":3330 },
 { "sets": [0, 1, 2, 3, 4, 5], "size":2549 },
+
 
 {"s":[130], "pSets":[1,3], "nSets":[4], "label":"x13n4x", "size":-1},
 {"s":[134], "pSets":[1,4], "nSets":[3], "label":"x14n3x", "size":-1},
